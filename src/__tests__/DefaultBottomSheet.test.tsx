@@ -64,12 +64,12 @@ describe('DefaultBottomSheet', () => {
         const subtitleText = getByText('¿Esta seguro de eliminar el producto Producto de prueba?');
         const closeButton = getByText('X');
 
-        // Initially hidden
+
         expect(subtitleText.props.style).toEqual(
             expect.arrayContaining([expect.objectContaining({ opacity: 0 })])
         );
 
-        // Open the bottom sheet
+
         fireEvent.press(closeButton);
 
         await waitFor(() => {
