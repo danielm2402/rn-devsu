@@ -1,35 +1,25 @@
 import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity } from 'react-native'
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import DefaultButton from '../../../components/buttons/DefaultButton'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types/RootStackParamList';
 import useGetProducts from '../../../hooks/products/useGetProducts';
 import { useFocusEffect } from '@react-navigation/native';
 import Subtitle from '../../../components/texts/Subtitle';
-interface Item {
-    id: string;
-    name: string;
-}
-
-const data: Item[] = [
-    { id: '123455', name: 'Nombre' },
-    { id: '123456', name: 'Nombre' },
-    { id: '123457', name: 'Nombre' },
-    { id: '123458', name: 'Nombre' },
-    { id: '123459', name: 'Nombre' },
-    { id: '123460', name: 'Nombre' },
-    { id: '123461', name: 'Nombre' },
-];
 
 type Props = NativeStackScreenProps<RootStackParamList>;
 
 export default function ListServicesScreen({ navigation }: Props): React.JSX.Element {
-
+    const [search, setSearch] = useState<string>("")
     const { products, loading, error, fetchProducts } = useGetProducts();
+
+    useEffect(() => {
+        //FILTER HERE!
+    }, [search])
 
     useFocusEffect(
         useCallback(() => {
-            fetchProducts(); // Llama a fetchProducts cada vez que la pantalla gana el enfoque
+            fetchProducts();
         }, [])
     );
 
@@ -55,7 +45,7 @@ export default function ListServicesScreen({ navigation }: Props): React.JSX.Ele
 
     return (
         <View style={styles.container}>
-            <TextInput style={styles.searchBar} placeholder="Search..." />
+            <TextInput style={styles.searchBar} placeholder="Search..." value={search} onChangeText={setSearch} />
             <FlatList
                 data={products}
                 keyExtractor={(item) => item.id}

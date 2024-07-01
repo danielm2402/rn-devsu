@@ -103,7 +103,7 @@ const DefaultBottomSheet: React.FC<DefaultBottomSheetProps> = ({ open, callbackO
 
                     <ScrollView style={styles.containerText}>
                         <Subtitle>
-                            Eliminar
+                            ¿Esta seguro de eliminar el producto 12345 test?
                         </Subtitle>
                     </ScrollView>
 

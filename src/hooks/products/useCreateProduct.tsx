@@ -27,8 +27,6 @@ const useCreateProduct = () => {
         }
     };
 
-
-
     return { product: product, loading, createProduct };
 };
 

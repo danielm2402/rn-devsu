@@ -40,12 +40,7 @@ function DetailScreen({ route, navigation }: Props) {
   return (
     <>
       <DefaultBottomSheet open={open} callbackOnClossing={() => setOpen(false)} />
-
-
       <View style={styles.container}>
-
-
-
         <View style={styles.content}>
           <View style={styles.containerTitle}>
             <Title>ID: {id}</Title>
@@ -75,9 +70,7 @@ function DetailScreen({ route, navigation }: Props) {
           </View>
         </View>
         <View style={styles.containerButtons}>
-          <DefaultButton color='#E9ECF2' textColor='#000' onPress={() => { navigation.goBack() }}>
-            <Text>Volver</Text>
-          </DefaultButton>
+
           <DefaultButton color='#E9ECF2' textColor='#000' onPress={() => { }}>
             <Text>Editar</Text>
           </DefaultButton>

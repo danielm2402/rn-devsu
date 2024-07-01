@@ -124,7 +124,6 @@ export default function CreateServiceScreen({ navigation }: Props): React.JSX.El
   const handleDateChange = (text: string) => {
     let formattedText = text.replace(/[^0-9]/g, '');
 
-    // Insertar los guiones en las posiciones correctas solo cuando la longitud sea suficiente
     if (formattedText.length > 4) {
       formattedText = formattedText.substring(0, 4) + '-' + formattedText.substring(4);
     }
@@ -132,7 +131,6 @@ export default function CreateServiceScreen({ navigation }: Props): React.JSX.El
       formattedText = formattedText.substring(0, 7) + '-' + formattedText.substring(7);
     }
 
-    // Verificar y corregir los valores de año, mes y día solo si la longitud es suficiente
     if (formattedText.length === 10) {
       const parts = formattedText.split('-');
       let year = parts[0];
@@ -224,9 +222,7 @@ export default function CreateServiceScreen({ navigation }: Props): React.JSX.El
         {loading ? <ActivityIndicator size="small" color="#0000ff" /> :
           <Text>Reiniciar</Text>}
       </DefaultButton>
-      <DefaultButton color='#E9ECF2' textColor='#000' onPress={() => { navigation.goBack() }}>
-        <Text>Volver</Text>
-      </DefaultButton>
+
 
     </ScrollView>
 
