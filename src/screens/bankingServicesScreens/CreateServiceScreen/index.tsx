@@ -1,10 +1,17 @@
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
-import React, { useState } from 'react'
+import { View, Text, StyleSheet, ActivityIndicator, ScrollView } from 'react-native'
+import React, { useState, useRef } from 'react'
 import moment from 'moment';
 import DefaultInput from '../../../components/inputs/DefaultInput';
 import DefaultButton from '../../../components/buttons/DefaultButton';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../../navigation/types/RootStackParamList';
+import { Product } from '../../../infrastructure/types/product';
+import DefaultModal, { ModalHandler } from '../../../components/modals/DefaultModal';
+import useCreateProduct from '../../../hooks/products/useCreateProduct';
 
-export default function CreateServiceScreen(): React.JSX.Element {
+
+type Props = NativeStackScreenProps<RootStackParamList, 'CreateScreen'>;
+export default function CreateServiceScreen({ navigation }: Props): React.JSX.Element {
 
   const [id, setId] = useState('');
   const [name, setName] = useState('');
@@ -19,6 +26,16 @@ export default function CreateServiceScreen(): React.JSX.Element {
     releaseDate: '',
     logo: '',
   });
+  const { createProduct, loading } = useCreateProduct()
+  const modalRef = useRef<ModalHandler>(null);
+
+  const openModal = (type: string, message: string) => {
+    modalRef.current?.showModal(type, message);
+  };
+
+  const closeModal = () => {
+    modalRef.current?.hideModal();
+  };
 
   const validateForm = () => {
     let valid = true;
@@ -43,17 +60,17 @@ export default function CreateServiceScreen(): React.JSX.Element {
     }
 
     if (!name) {
-      newErrors.name = 'Este campo es requerido!';
+      newErrors.name = 'Este campo es requerido';
       valid = false;
     }
 
     if (!description) {
-      newErrors.description = 'Este campo es requerido!';
+      newErrors.description = 'Este campo es requerido';
       valid = false;
     }
 
     if (!logo) {
-      newErrors.logo = 'Este campo es requerido!';
+      newErrors.logo = 'Este campo es requerido';
       valid = false;
     }
 
@@ -73,9 +90,24 @@ export default function CreateServiceScreen(): React.JSX.Element {
     return valid;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (validateForm()) {
-      // Handle form submission
+      const newProduct: Product = {
+        id,
+        name,
+        description,
+        logo,
+        date_release: new Date(releaseDate),
+        date_revision: new Date(reviewDate),
+      };
+      const { result, message } = await createProduct(newProduct)
+      if (result) {
+        openModal("Success", message)
+        handleReset()
+        return
+      }
+      openModal("Error", message)
+
     }
   };
 
@@ -90,56 +122,77 @@ export default function CreateServiceScreen(): React.JSX.Element {
   };
 
   const handleDateChange = (text: string) => {
+    let formattedText = text.replace(/[^0-9]/g, '');
 
-    let formattedText = text.replace(/[^0-9\-]/g, '');
-
-
-    if (formattedText.length === 4 || formattedText.length === 7) {
-      if (formattedText.length > releaseDate.length) {
-        formattedText += '-';
-      }
+    // Insertar los guiones en las posiciones correctas solo cuando la longitud sea suficiente
+    if (formattedText.length > 4) {
+      formattedText = formattedText.substring(0, 4) + '-' + formattedText.substring(4);
+    }
+    if (formattedText.length > 7) {
+      formattedText = formattedText.substring(0, 7) + '-' + formattedText.substring(7);
     }
 
-
-    if (formattedText.length > 10) {
-      formattedText = formattedText.substring(0, 10);
-    }
-
-
-    const parts = formattedText.split('-');
-    if (parts.length === 3) {
-      const year = parts[0];
-      const month = parts[1];
-      const day = parts[2];
-
-      if (month && (parseInt(month, 10) < 1 || parseInt(month, 10) > 12)) {
-        formattedText = `${year}-`;
-      }
-
-      if (day) {
-        const daysInMonth = moment(`${year}-${month}`, 'YYYY-MM').daysInMonth();
-        if (parseInt(day, 10) < 1 || parseInt(day, 10) > daysInMonth) {
-          formattedText = `${year}-${month}-`;
-        }
-      }
-    }
-
-    setReleaseDate(formattedText);
-
+    // Verificar y corregir los valores de año, mes y día solo si la longitud es suficiente
     if (formattedText.length === 10) {
+      const parts = formattedText.split('-');
+      let year = parts[0];
+      let month = parts[1];
+      let day = parts[2];
+
+      if (parseInt(month, 10) < 1 || parseInt(month, 10) > 12) {
+        month = '';
+      } else if (month.length === 1) {
+        month = `0${month}`;
+      }
+
+      const daysInMonth = moment(`${year}-${month}`, 'YYYY-MM').daysInMonth();
+      if (parseInt(day, 10) < 1 || parseInt(day, 10) > daysInMonth) {
+        day = '';
+      } else if (day.length === 1) {
+        day = `0${day}`;
+      }
+
+      formattedText = [year, month, day].filter(Boolean).join('-');
+
+      setReleaseDate(formattedText);
+
       const releaseDateMoment = moment(formattedText, 'YYYY-MM-DD');
       const reviewDateMoment = releaseDateMoment.add(1, 'year');
       const reviewDate = reviewDateMoment.format('YYYY-MM-DD');
       setReviewDate(reviewDate);
     } else {
-      setReviewDate('')
+      setReleaseDate(formattedText);
+      setReviewDate('');
     }
 
+    const partsImmediate = formattedText.split('-');
+    if (partsImmediate.length > 1) {
+      let monthImmediate = partsImmediate[1];
+      if (monthImmediate && parseInt(monthImmediate, 10) > 12) {
+        monthImmediate = '12';
+      }
+      partsImmediate[1] = monthImmediate;
+    }
+    if (partsImmediate.length > 2) {
+      let dayImmediate = partsImmediate[2];
+      if (dayImmediate) {
+        let yearImmediate = partsImmediate[0];
+        let monthImmediate = partsImmediate[1];
+        const daysInMonthImmediate = moment(`${yearImmediate}-${monthImmediate}`, 'YYYY-MM').daysInMonth();
+        if (parseInt(dayImmediate, 10) > daysInMonthImmediate) {
+          dayImmediate = daysInMonthImmediate.toString();
+        }
+        partsImmediate[2] = dayImmediate;
+      }
+    }
+    formattedText = partsImmediate.filter(Boolean).join('-');
+    setReleaseDate(formattedText);
   };
 
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <DefaultModal ref={modalRef} />
       <Text style={styles.title}>Formulario de Registro</Text>
       <View style={styles.formGroup}>
         <DefaultInput label='ID' value={id} onChangeText={setId} error={errors.id}></DefaultInput>
@@ -158,17 +211,21 @@ export default function CreateServiceScreen(): React.JSX.Element {
       <View style={styles.formGroup}>
         <DefaultInput label='Fecha Liberación' value={releaseDate} onChangeText={handleDateChange} keyboardType="numeric"
           placeholder="YYYY-MM-DD" error={errors.releaseDate}></DefaultInput>
-
       </View>
       <View style={styles.formGroup}>
         <DefaultInput label='Fecha Revisión' value={reviewDate} onChangeText={handleDateChange} keyboardType="numeric"
           placeholder="YYYY-MM-DD" error={""}></DefaultInput>
       </View>
-      <DefaultButton color='#FEDD03' textColor='#000' onPress={handleSubmit}>
-        <Text>Enviar</Text>
+      <DefaultButton color='#FEDD03' textColor='#000' onPress={handleSubmit} disabled={loading}>
+        {loading ? <ActivityIndicator size="small" color="#0000ff" /> :
+          <Text>Enviar</Text>}
       </DefaultButton>
-      <DefaultButton color='#E9ECF2' textColor='#000' onPress={handleReset}>
-        <Text>Reiniciar</Text>
+      <DefaultButton color='#E9ECF2' textColor='#000' onPress={handleReset} disabled={loading}>
+        {loading ? <ActivityIndicator size="small" color="#0000ff" /> :
+          <Text>Reiniciar</Text>}
+      </DefaultButton>
+      <DefaultButton color='#E9ECF2' textColor='#000' onPress={() => { navigation.goBack() }}>
+        <Text>Volver</Text>
       </DefaultButton>
 
     </ScrollView>

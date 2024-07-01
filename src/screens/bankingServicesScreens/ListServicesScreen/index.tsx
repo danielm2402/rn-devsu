@@ -1,8 +1,11 @@
 import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity } from 'react-native'
-import React, { Component } from 'react'
+import React, { useCallback } from 'react'
 import DefaultButton from '../../../components/buttons/DefaultButton'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types/RootStackParamList';
+import useGetProducts from '../../../hooks/products/useGetProducts';
+import { useFocusEffect } from '@react-navigation/native';
+import Subtitle from '../../../components/texts/Subtitle';
 interface Item {
     id: string;
     name: string;
@@ -21,11 +24,40 @@ const data: Item[] = [
 type Props = NativeStackScreenProps<RootStackParamList>;
 
 export default function ListServicesScreen({ navigation }: Props): React.JSX.Element {
+
+    const { products, loading, error, fetchProducts } = useGetProducts();
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchProducts(); // Llama a fetchProducts cada vez que la pantalla gana el enfoque
+        }, [])
+    );
+
+    if (loading) {
+        return (<View style={styles.containerMessage}>
+            <Text>Loading...</Text>
+        </View>)
+    }
+
+    if (error) {
+        return (<View style={styles.containerMessage}>
+            <Text>Error: {error.message}</Text>
+        </View>)
+    }
+    if (products.length === 0) {
+        return (<View style={styles.containerMessage}>
+            <Subtitle>No tiene productos registrados</Subtitle>
+            <DefaultButton color='#FEDD03' textColor='#000' onPress={() => { navigation.navigate("CreateScreen") }}>
+                <Text>Agregar</Text>
+            </DefaultButton>
+        </View>)
+    }
+
     return (
         <View style={styles.container}>
             <TextInput style={styles.searchBar} placeholder="Search..." />
             <FlatList
-                data={data}
+                data={products}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <TouchableOpacity style={styles.listItem} onPress={() => navigation.navigate("DetailScreen", {
@@ -44,6 +76,9 @@ export default function ListServicesScreen({ navigation }: Props): React.JSX.Ele
                     </TouchableOpacity>
                 )}
             />
+            <DefaultButton color='#FEDD03' textColor='#000' onPress={() => { navigation.navigate("CreateScreen") }}>
+                <Text>Agregar</Text>
+            </DefaultButton>
         </View>
 
     )
@@ -54,6 +89,10 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 16,
         backgroundColor: 'white',
+    },
+    containerMessage: {
+        flex: 1,
+        justifyContent: 'center'
     },
     header: {
         flexDirection: 'row',
