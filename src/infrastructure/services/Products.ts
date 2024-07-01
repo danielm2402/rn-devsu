@@ -4,7 +4,6 @@ import { Product, Products, CProducto } from "../types/product";
 export default {
     async getProducts(): Promise<Products> {
         const { data } = await HttpProducts.get<Products>('bp/products')
-
         return data;
     },
 
@@ -19,6 +18,12 @@ export default {
     },
     async verifyId(id: String): Promise<boolean> {
         const { data } = await HttpProducts.get<boolean>('bp/products/verification/' + id)
+        return data
+
+    },
+
+    async deleteProduct(id: String): Promise<string> {
+        const { data } = await HttpProducts.delete('bp/products/' + id)
         return data
 
     }

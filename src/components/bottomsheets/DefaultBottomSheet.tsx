@@ -12,10 +12,12 @@ const MIN_TRANSLATE_Y = SCREEN_HEIGHT / 5;
 
 interface DefaultBottomSheetProps extends ViewProps {
     open: boolean,
+    name: string,
+    accept: () => void
     callbackOnClossing: () => void
 }
 
-const DefaultBottomSheet: React.FC<DefaultBottomSheetProps> = ({ open, callbackOnClossing, children, style, ...props }) => {
+const DefaultBottomSheet: React.FC<DefaultBottomSheetProps> = ({ name, accept, open, callbackOnClossing, children, style, ...props }) => {
     const translateY = useSharedValue(SCREEN_HEIGHT);
     const context = useSharedValue({ y: 0 });
 
@@ -103,11 +105,11 @@ const DefaultBottomSheet: React.FC<DefaultBottomSheetProps> = ({ open, callbackO
 
                     <ScrollView style={styles.containerText}>
                         <Subtitle>
-                            ¿Esta seguro de eliminar el producto 12345 test?
+                            ¿Esta seguro de eliminar el producto {name}?
                         </Subtitle>
                     </ScrollView>
 
-                    <DefaultButton color='#FEDD03' textColor='#000' onPress={() => { }}>
+                    <DefaultButton color='#FEDD03' textColor='#000' onPress={accept}>
                         <Text>Confirmar</Text>
                     </DefaultButton>
                     <DefaultButton color='#E9ECF2' textColor='#000' onPress={closeBottomSheet}>

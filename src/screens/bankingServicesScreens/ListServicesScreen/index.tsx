@@ -51,12 +51,12 @@ export default function ListServicesScreen({ navigation }: Props): React.JSX.Ele
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <TouchableOpacity style={styles.listItem} onPress={() => navigation.navigate("DetailScreen", {
-                        id: "123245",
-                        name: "test",
-                        description: "prueba124",
-                        logo: "url",
-                        releaseDate: "12/22/24",
-                        reviewDate: "12/45/12",
+                        id: item.id,
+                        name: item.name,
+                        description: item.description,
+                        logo: item.logo,
+                        releaseDate: new Date(item.date_release).toISOString(),
+                        reviewDate: new Date(item.date_revision).toISOString(),
                     })}>
                         <View>
                             <Text style={styles.name}>{item.name}</Text>
