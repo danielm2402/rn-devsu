@@ -15,13 +15,22 @@ import {
 import { NavigationContainer } from '@react-navigation/native';
 import AppStack from './src/navigation/AppStack';
 import Header from './src/components/appheaders/Header';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import DefaultBottomSheet from './src/components/bottomsheets/DefaultBottomSheet';
+
 function App(): React.JSX.Element {
 
   return (
-    <NavigationContainer>
-      <Header title='BANCO' />
-      <AppStack />
-    </NavigationContainer>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+
+      <NavigationContainer>
+
+        <Header title='BANCO' />
+        <AppStack />
+
+      </NavigationContainer>
+
+    </GestureHandlerRootView>
   );
 }
 
